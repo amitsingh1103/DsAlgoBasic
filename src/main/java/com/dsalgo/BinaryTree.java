@@ -1,7 +1,5 @@
 package com.dsalgo;
 
-import jdk.nashorn.internal.ir.IfNode;
-
 import java.util.*;
 
 public class BinaryTree {
@@ -134,7 +132,7 @@ public class BinaryTree {
     }
 
     /**
-     * Size of Binary Tree
+     * Size of Binary Tree -> Number of nodes in BT
      */
     public int binaryTreeSize(TreeNode root) {
         if (Objects.isNull(root)) {
