@@ -17,6 +17,7 @@ public class BinaryTree {
         int val;
         TreeNode left;
         TreeNode right;
+        TreeNode parent;
 
         public TreeNode(int val) {
             this.val = val;
@@ -285,7 +286,105 @@ public class BinaryTree {
         }
     }
 
+    /**
+     * BST is a binary tree with BST property: Let x be a node in a binary search tree property. If y is a node in
+     * left subtree of x then y.key <= x.key. If y is a node in the right subtree then y.key >= x.key.
+     * This data structure supports all dynamic set operations like INSERT, DELETE, SEARCH, MINIMUM, MAXIMUM,
+     * PREDECESSOR, SUCCESSOR.
+     * Binary Search Tree Minimum
+     */
+    public TreeNode treeMinimum(TreeNode root) {
+        if (root == null) {
+            return root;
+        }
 
+        TreeNode current = root;
+        while (current.left != null) {
+            current = current.left;
+        }
+        return current;
+    }
+
+    /**
+     * Binary Search Tree Successor
+     */
+    public TreeNode treeSuccessor(TreeNode root) {
+        if (root == null) {
+            return root;
+        }
+
+        TreeNode current = root;
+        // case 1: Have right subtree-> Get the minimum(leftmost) node in the right subtree of the node.
+        if (current.right != null) {
+            return treeMinimum(current);
+        }
+
+        // case 2: Do not have right subtree-> Go up the tree till we encounter a node in whose left subtree this
+        // node is falling.
+        TreeNode parent = current.parent;
+        while (parent != null && current == parent.right) {
+            current = parent;
+            parent = parent.parent;
+        }
+        return parent;
+    }
+
+    /**
+     * Binary Search Tree Deletion
+     * Algorithm:-
+     * 1. If z has no left child, then we replace z by its right child, which may or may not be NIL.
+     *      a. When z’s right child is NIL, this case deals with the situation in which z has no children.
+     *      b. When z's right child is non-NIL, this case handles the situation in which z has just one child, which
+     *      is its right child.
+     * 2. If z has just one child, which is its left child, then we replace z by its left child.
+     * 3. Otherwise, z has both a left and a right child. We find z’s successor y, which lies in z’s right subtree and
+     * has no left child. We want to splice y out of its current location and have it replace z in the tree.
+     *      a. If y is z’s right child, then we replace z by y, leaving y’s right child alone.
+     *      b. Otherwise, y lies within z's right subtree but is not z’s right child. In this case, we first replace
+     *      y by its own right child, and then we replace z by y.
+     */
+    public TreeNode bstDeletion(TreeNode root, TreeNode z) {
+        if (root == null || z == null) {
+            return root;
+        }
+
+        // Case 1: Left child is null
+        if (z.left == null) {
+            bstSubtreeTransplant(root, z, z.right);
+            return root;
+        } else if (z.right == null) {
+            // Case 2: right child is null
+            bstSubtreeTransplant(root, z, z.left);
+            return root;
+        }
+        // Case 3: Both left and right child are not null
+        TreeNode successorNode = treeMinimum(z.right);
+        if (successorNode != z.right) {
+            // Case 3.b
+            bstSubtreeTransplant(root, successorNode, successorNode.right);
+            successorNode.right = z.right;
+            successorNode.right.parent = successorNode;
+        }
+        // Common to both case 3.a and case 3.b:
+        bstSubtreeTransplant(root, z, successorNode);
+        successorNode.left = z.left;
+        successorNode.left.parent = successorNode;
+        return root;
+    }
+
+    private void bstSubtreeTransplant(TreeNode root, TreeNode source, TreeNode target) {
+        if (source.parent == null) {
+            root = target;
+        } else if (source == source.parent.left) {
+            source.parent.left = target;
+        } else {
+            source.parent.right = target;
+        }
+
+        if (target != null) {
+            target.parent = source.parent;
+        }
+    }
 
     // level by level printing of binary tree
     // Reverse level order traversal of binary tree
