@@ -386,10 +386,219 @@ public class BinaryTree {
         }
     }
 
-    // level by level printing of binary tree
-    // Reverse level order traversal of binary tree
-    // Tree traversal spiral order
-    // Lowest common ancestor of BST
-    // Lowest common ancestor of binary tree
-    // Largest BST in binary tree
+    /**
+     * Level by level printing of binary tree
+     *
+     * Solution: Using a queue and print next line when current level completes.
+     */
+    public void printBTLevelByLevel(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+
+        Queue<TreeNode> q = new ArrayDeque<>();
+        q.add(root);
+        int current = 1;
+        int next = 0;
+        while (!q.isEmpty()) {
+            TreeNode node = q.poll();
+            System.out.print(node.val + ", ");
+            if (node.left != null) {
+                q.add(node.left);
+                next++;
+            }
+            if (node.right != null) {
+                q.add(node.right);
+                next++;
+            }
+
+            current--;
+            if (current == 0) {
+                System.out.println();
+                current = next;
+                next = 0;
+            }
+        }
+    }
+
+    /**
+     * Reverse level order traversal of binary tree
+     *
+     * Solution: Use queue and store each list of levels in a stack.
+     */
+    public void printLevelOrderTraversalInReverse(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+
+        Stack<List<TreeNode>> s = new Stack<>();
+        Queue<TreeNode> q = new ArrayDeque<>();
+        q.add(root);
+        int current = 1;
+        int next = 0;
+        List<TreeNode> level = new ArrayList<>();
+        while (!q.isEmpty()) {
+            TreeNode node = q.poll();
+            if (node.left != null) {
+                q.add(node.left);
+                next++;
+            }
+            if (node.right != null) {
+                q.add(node.right);
+                next++;
+            }
+
+            current--;
+            level.add(node);
+            if (current == 0) {
+                s.add(level);
+                current = next;
+                next = 0;
+                level = new ArrayList<>();
+            }
+        }
+
+        while (!s.isEmpty()) {
+            s.pop().stream().forEach(node -> System.out.print(node.val + ", "));
+        }
+    }
+
+    /**
+     * Tree traversal spiral order
+     *
+     * Solution: 2 stacks or deque technique: O(n)
+     */
+    public void printBtSpiralOrder(TreeNode root) {
+        if (root == null) {
+            return;
+        }
+
+        Deque<TreeNode> dq = new ArrayDeque<>();
+        dq.offerFirst(root);
+        int firstCount = 1;
+        int lastCount = 0;
+        TreeNode node;
+        while (firstCount !=0 || lastCount != 0) {
+            while (firstCount != 0) {
+                node = dq.pollFirst();
+                System.out.print(node.val + ", ");
+                if (node.left != null) {
+                    dq.offerLast(node.left);
+                    lastCount++;
+                }
+                if (node.right != null) {
+                    dq.offerLast(node.right);
+                    lastCount++;
+                }
+                firstCount--;
+            }
+            System.out.println();
+            while (lastCount != 0) {
+                node = dq.pollLast();
+                System.out.print(node.val + ", ");
+                if (node.right != null) {
+                    dq.offerFirst(node.right);
+                    firstCount++;
+                }
+                if (node.left != null) {
+                    dq.offerFirst(node.left);
+                    firstCount++;
+                }
+                lastCount--;
+            }
+            System.out.println();
+        }
+    }
+
+    /**
+     * Lowest Common Ancestor of BST.
+     */
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null) {
+            return null;
+        }
+        if (root.val > Math.max(p.val, q.val)) {
+            return lowestCommonAncestor(root.left, p, q);
+        } else if (root.val < Math.min(p.val, q.val)) {
+            return lowestCommonAncestor(root.right, p, q);
+        }
+        return root;
+    }
+
+    /**
+     * Lowest Common Ancestor of binary tree.
+     */
+    public TreeNode lcaOfBinaryTree(TreeNode root, TreeNode p, TreeNode q) {
+        if (root == null) {
+            return null;
+        }
+
+        if (root == p || root == q) {
+            return root;
+        }
+
+        TreeNode left = lcaOfBinaryTree(root.left, p, q);
+        TreeNode right = lcaOfBinaryTree(root.right, p, q);
+
+        if (left != null && right != null) {
+            return root;
+        } else if (left == null && right == null) {
+            return null;
+        }
+        return left != null ? left : right;
+    }
+
+    /**
+     * Largest BST in Binary Tree.
+     */
+    public int largestBST(TreeNode root) {
+        MinMax minMax = largest(root);
+        return minMax.size;
+    }
+
+    private MinMax largest(TreeNode root) {
+        if (root == null) {
+            return new MinMax();
+        }
+
+        MinMax leftMinMax = largest(root.left);
+        MinMax rightMinMax = largest(root.right);
+
+        if (!leftMinMax.isBST || !rightMinMax.isBST || (leftMinMax.max > root.val) || (rightMinMax.min < root.val)) {
+            return new MinMax(false, 0, 0, Math.max(leftMinMax.size, rightMinMax.size));
+        }
+
+        MinMax minMax = new MinMax();
+        minMax.isBST = true;
+        minMax.size = leftMinMax.size + rightMinMax.size + 1;
+        minMax.min = leftMinMax != null ? leftMinMax.min : root.val;
+        minMax.max = rightMinMax != null ? rightMinMax.max : root.val;
+        return minMax;
+    }
+
+    private class MinMax {
+        private boolean isBST;
+        private int min;
+        private int max;
+        private int size;
+
+        public MinMax() {
+            max = Integer.MIN_VALUE;
+            min = Integer.MAX_VALUE;
+            isBST = true;
+            size = 0;
+        }
+
+        public MinMax(boolean isBST, int min, int max, int size) {
+            this.isBST = isBST;
+            this.min = min;
+            this.max = max;
+            this.size = size;
+        }
+    }
+
+    /**
+     * Morris Inorder Traversal of Binary Tree
+     */
+
 }
